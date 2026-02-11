@@ -1,0 +1,11 @@
+  {{define "content"}}
+    <h1>Posts</h1>
+    {{range .Posts}}
+    <article>
+        <h2><a href="/posts/{{.Slug}}">{{.Title}}</a></h2>
+        <p>{{.Tagline}}</p>
+    </article>
+    {{else}}
+    <p>No posts yet.</p>
+    {{end}}
+  {{end}}
