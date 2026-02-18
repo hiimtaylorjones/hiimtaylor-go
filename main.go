@@ -8,6 +8,8 @@
 
         "github.com/go-chi/chi/v5"
         "github.com/go-chi/chi/v5/middleware"
+
+        "github.com/hiimtaylorjones/hiimtaylor-go/database"
   )
 
   var templates map[string]*template.Template
@@ -45,6 +47,9 @@
   }
 
   func main() {
+      database.Connect()
+      defer database.Close()
+
       loadTemplates()
 
       r := chi.NewRouter()
