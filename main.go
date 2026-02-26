@@ -10,6 +10,7 @@
         "github.com/go-chi/chi/v5/middleware"
 
         "github.com/hiimtaylorjones/hiimtaylor-go/database"
+        "github.com/hiimtaylorjones/hiimtaylor-go/models"
   )
 
   var templates map[string]*template.Template
@@ -77,28 +78,23 @@
   }
 
   func handleListPosts(w http.ResponseWriter, r *http.Request) {
-      // Short term solution until we implement database connection
-      data := map[string]any{
-            "Posts": []map[string]string{
-                  {"Title": "My First Post", "Tagline": "Hello world", "Slug": "my-first-post"},
-                  {"Title": "Learning Go", "Tagline": "Coming from Ruby", "Slug": "learning-go"},
-            },
+      posts, err := models.GetPublishedPosts()
+      if err != nil {
+            http.Error(w, "Error fetching posts", http.StatusInternalServerError)
+            return
       }
-      renderTemplate(w, "posts.index", data)
+      renderTemplate(w, "posts.index", map[string]any{"Posts": posts})
   }
 
   func handleShowPost(w http.ResponseWriter, r *http.Request) {
       slug := chi.URLParam(r, "slug")
       
-      // Another temporary solution until database implementation.
-      data := map[string]any{
-            "Post": map[string]string{
-                  "Title": slug,
-                  "Tagline": "A placeholder post",
-                  "Body": "This is the body of the post.",
-            },
+      post, err := models.GetPostBySlug(slug)
+      if err != nil {
+            http.NotFound(w, r)
+            return
       }
-      renderTemplate(w, "posts.show", data)
+      renderTemplate(w, "posts.show", map[string]any{"Post": post})
   }
 
   func handleResume(w http.ResponseWriter, r *http.Request) {

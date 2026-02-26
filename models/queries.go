@@ -8,11 +8,10 @@ import (
 )
 
 func GetPublishedPosts() ([]Post, error) {
-
-	query := "SELECT id, tageline, body, slug, created_at, updated_at WHERE published = TRUE ORDER BY DESC"
+	query := "SELECT id, title, tagline, body, slug, published, created_at, updated_at FROM posts WHERE published = TRUE ORDER BY created_at DESC"
 
 	rows, err := database.Pool.Query(
-		context.Background(), query
+		context.Background(), query,
 	)
 
 	if err != nil {
@@ -31,13 +30,13 @@ func GetPublishedPosts() ([]Post, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error parsing post: %w", err)
 		}
-		post = append(posts, p)
+		posts = append(posts, p)
 	}
 
 	return posts, nil
 }
 
-func GetPostsBySlug(slug string) (Post, error) {
+func GetPostBySlug(slug string) (Post, error) {
 	var p Post
 	query := "SELECT id, title, tagline, body, slug, published, created_at, updated_at FROM posts WHERE slug = $1"
 	err := database.Pool.QueryRow(
@@ -45,8 +44,8 @@ func GetPostsBySlug(slug string) (Post, error) {
 		query,
 		slug,
 	).Scan(
-		 	&p.ID, &p.Title, &p.Tagline, &p.Body, &p.Slug,
-    	&p.Published, &p.CreatedAt, &p.UpdatedAt
+		&p.ID, &p.Title, &p.Tagline, &p.Body, &p.Slug,
+		&p.Published, &p.CreatedAt, &p.UpdatedAt,
 	)
 
 	if err != nil {

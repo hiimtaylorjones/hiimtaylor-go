@@ -1,9 +1,9 @@
   {{define "content"}}
   <article>
       <h1>{{.Post.Title}}</h1>
-      <p>{{.Post.Tagline}}</p>
+      <p class="tagline">{{.Post.Tagline}}</p>
       <div class="post-body">
-          {{.Post.Body}}
+          {{.Post.RenderedBody}}
       </div>
   </article>
   {{end}}
