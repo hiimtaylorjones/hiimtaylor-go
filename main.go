@@ -25,6 +25,8 @@ func loadTemplates() {
         "resume":         "templates/resume.html",
         "posts.index":    "templates/posts/index.html",
         "posts.show":     "templates/posts/show.html",
+        "posts.new":      "templates/posts/new.html",
+        "posts.edit":     "templates/posts/edit.html",
     }
 
     for name, pages := range pages {
@@ -64,8 +66,13 @@ func main() {
 
     // Routes
     r.Get("/", handleHome)
+    r.Get("/posts/new", handleNewPost)
     r.Get("/posts", handleListPosts)
+    r.Post("/posts", handleCreatePost)
     r.Get("/posts/{slug}", handleShowPost)
+    r.Get("/posts/{slug}/edit", handleEditPost)
+    r.Post("/posts/{slug}/edit", handleUpdatePost)
+    r.Post("/posts/{slug}/delete", handleDeletePost)
     r.Get("/resume", handleResume)
 
     log.Println("Server starting on http://localhost:3000")

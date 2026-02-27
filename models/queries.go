@@ -59,7 +59,7 @@ func CreatePost(title, tagline, body, slug string, published bool) (Post, error)
 	query := `
 		INSERT INTO posts (title, tagline, body, slug, published) 
 			VALUES($1, $2, $3, $4, $5) 
-			RETURNING id, tagline, body, slug, published, created_at, updated_at
+			RETURNING id, title, tagline, body, slug, published, created_at, updated_at
 	`
 	err := database.Pool.QueryRow(
 		context.Background(),
@@ -81,7 +81,7 @@ func UpdatePost(id int, title, tagline, body string, published bool) (Post, erro
 	query := `
 		UPDATE posts SET title=$1, tagline=$2, body=$3, published=$4, updated_at=NOW()
 			WHERE id=$5
-			RETURNING id, tagline, body, slug, published, created_at, updated_at  
+			RETURNING id, title, tagline, body, slug, published, created_at, updated_at
 	`
 
 	err := database.Pool.QueryRow(
@@ -102,7 +102,7 @@ func UpdatePost(id int, title, tagline, body string, published bool) (Post, erro
 func DeletePost(id int) error {
 	_, err := database.Pool.Exec(
 		context.Background(),
-		"DELETE FROM post WHERE id=$1",
+		"DELETE FROM posts WHERE id=$1",
 		id,
 	)
 	if err != nil {

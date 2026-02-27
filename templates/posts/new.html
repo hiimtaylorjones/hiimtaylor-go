@@ -1,0 +1,24 @@
+{{define "content"}}
+<h1>New Post</h1>
+<form method="POST" action="/posts">
+    <div>
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" required>
+    </div>
+    <div>
+        <label for="tagline">Tagline</label>
+        <input type="text" id="tagline" name="tagline">
+    </div>
+    <div>
+        <label for="body">Body (Markdown)</label>
+        <textarea id="body" name="body" rows="20" required></textarea>
+    </div>
+    <div>
+        <label>
+            <input type="checkbox" name="published" value="true">Published
+        </label>
+    </div>
+    <button type="submit">Create Post</button>
+    <a href="/posts">Cancel</a>
+</form>
+{{end}}
