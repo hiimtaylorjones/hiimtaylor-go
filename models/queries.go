@@ -53,3 +53,60 @@ func GetPostBySlug(slug string) (Post, error) {
 	}
 	return p, nil
 }
+
+func CreatePost(title, tagline, body, slug string, published bool) (Post, error) {
+	var p Post
+	query := `
+		INSERT INTO posts (title, tagline, body, slug, published) 
+			VALUES($1, $2, $3, $4, $5) 
+			RETURNING id, tagline, body, slug, published, created_at, updated_at
+	`
+	err := database.Pool.QueryRow(
+		context.Background(),
+		query,
+		title, tagline, body, slug, published,
+	).Scan(
+		&p.ID, &p.Title, &p.Tagline, &p.Body, &p.Slug,
+		&p.Published, &p.CreatedAt, &p.UpdatedAt,
+	)
+	
+	if err != nil {
+		return Post{}, fmt.Errorf("error creating post: %w", err)
+	}
+	return p, nil
+}
+
+func UpdatePost(id int, title, tagline, body string, published bool) (Post, error) {
+	var p Post
+	query := `
+		UPDATE posts SET title=$1, tagline=$2, body=$3, published=$4, updated_at=NOW()
+			WHERE id=$5
+			RETURNING id, tagline, body, slug, published, created_at, updated_at  
+	`
+
+	err := database.Pool.QueryRow(
+		context.Background(),
+		query,
+		title, tagline, body, published, id,
+	).Scan(
+		&p.ID, &p.Title, &p.Tagline, &p.Body, &p.Slug,
+		&p.Published, &p.CreatedAt, &p.UpdatedAt,
+	)
+	
+	if err != nil {
+		return Post{}, fmt.Errorf("error updating post: %w", err)
+	}
+	return p, nil
+}
+
+func DeletePost(id int) error {
+	_, err := database.Pool.Exec(
+		context.Background(),
+		"DELETE FROM post WHERE id=$1",
+		id,
+	)
+	if err != nil {
+		return fmt.Errorf("error deleting post: %w", err)
+	}
+	return nil
+}

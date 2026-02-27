@@ -1,16 +1,17 @@
 package slug
 
 import (
-	"regex"
+	"regexp"
 	"strings"
 )
 
-var nonAlphanumeric = regex.MustCompile(`[^a-z0-9-]+`)
+var nonAlphanumeric = regexp.MustCompile(`[^a-z0-9-]+`)
 
 func Generate(title string) string {
 	s := strings.ToLower(title)
 	s = strings.ReplaceAll(s, " ", "-")
-	s = nonAlphanumeric.ReplaceAllStrings(s, "")
-	s = regexp.MustCompile(`-+`).ReplaceAllStrings(s, "-")
+	s = nonAlphanumeric.ReplaceAllString(s, "")
+	s = regexp.MustCompile(`-+`).ReplaceAllString(s, "-")
 	s = strings.Trim(s, "-")
+	return s
 }
