@@ -3,6 +3,7 @@ package main
 import (
     "html/template"
     "log"
+    "time"
     "net/http"
     "path/filepath"
 
@@ -10,9 +11,12 @@ import (
     "github.com/go-chi/chi/v5/middleware"
 
     "github.com/hiimtaylorjones/hiimtaylor-go/database"
+    authmiddleware "github.com/hiimtaylorjones/hiimtaylor-go/middleware"
+    "github.com/alexedwards/scs/v2"
 )
 
 var templates map[string]*template.Template
+var sessionManager *scs.SessionManager
 
 func loadTemplates() {
     templates = make(map[string]*template.Template)
@@ -54,6 +58,10 @@ func main() {
 
     loadTemplates()
 
+    sessionManager = scs.New()
+    sessionManager.Lifetime = 6 * time.Hour
+    authmiddleware.SetSessionManager(sessionManager)
+
     r := chi.NewRouter()
 
     // Middleware
@@ -64,17 +72,28 @@ func main() {
     fileServer := http.FileServer(http.Dir("static"))
     r.Handle("/static/*", http.StripPrefix("/static/", fileServer))
 
-    // Routes
+    // Public routes
     r.Get("/", handleHome)
-    r.Get("/posts/new", handleNewPost)
     r.Get("/posts", handleListPosts)
-    r.Post("/posts", handleCreatePost)
     r.Get("/posts/{slug}", handleShowPost)
-    r.Get("/posts/{slug}/edit", handleEditPost)
-    r.Post("/posts/{slug}/edit", handleUpdatePost)
-    r.Post("/posts/{slug}/delete", handleDeletePost)
     r.Get("/resume", handleResume)
 
+    // Auth routes
+    // r.Get("/login", handleLoginForm)
+    // r.Post("/login", handleLogin)
+    // r.Post("/logout", handleLogout)
+
+    // Protected routes
+    r.Group(func(r chi.Router) {
+        r.Use(authmiddleware.RequireAdmin)
+        r.Get("/posts/new", handleNewPost)
+        r.Post("/posts", handleCreatePost)
+        r.Get("/posts/{slug}/edit", handleEditPost)
+        r.Post("/posts/{slug}/edit", handleUpdatePost)
+        r.Post("/posts/{slug}/delete", handleDeletePost)
+    })
+
+
     log.Println("Server starting on http://localhost:3000")
-    log.Fatal(http.ListenAndServe(":3000", r))
+    log.Fatal(http.ListenAndServe(":3000", sessionManager.LoadAndSave(r)))
 }
