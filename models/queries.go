@@ -110,3 +110,32 @@ func DeletePost(id int) error {
 	}
 	return nil
 }
+
+func GetAdminByEmail(email string) (Admin, error) {
+	var a Admin
+	err := database.Pool.QueryRow(
+		context.Background(),
+		`SELECT id, email, encrypted_password FROM admins WHERE email = $1`,
+		email,
+	).Scan(&a.ID, &a.Email, &a.EncryptedPassword)
+
+	if err != nil {
+		return Admin{}, fmt.Errorf("admin not found: %w", err)
+	}
+	return a, nil
+}
+
+func CreateAdmin(email, hashedPassword string) (Admin, error) {
+	var a Admin
+	err := database.Pool.QueryRow(
+					context.Background(),
+					`INSERT INTO admins (email, encrypted_password)
+						VALUES ($1, $2)
+						RETURNING id, email, encrypted_password`,
+					email, hashedPassword,
+	).Scan(&a.ID, &a.Email, &a.EncryptedPassword)
+	if err != nil {
+					return Admin{}, fmt.Errorf("error creating admin: %w", err)
+	}
+	return a, nil
+}

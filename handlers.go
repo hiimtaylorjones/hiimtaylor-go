@@ -2,7 +2,9 @@ package main
 
 import (
 	"net/http"
+	"fmt"
 
+	"golang.org/x/crypto/bcrypt"
 	"github.com/go-chi/chi/v5"
 	"github.com/hiimtaylorjones/hiimtaylor-go/models"
 	"github.com/hiimtaylorjones/hiimtaylor-go/slug"
@@ -111,4 +113,37 @@ func handleDeletePost(w http.ResponseWriter, r *http.Request) {
 
 func handleResume(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "resume", nil)
+}
+
+func handleLoginForm(w http.ResponseWriter, r *http.Request) {
+	renderTemplate(w, "login", nil)
+}
+
+func handleLogin(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Error parsing form", http.StatusBadRequest)
+		return
+	}
+
+	email := r.FormValue("email")
+	password := r.FormValue("password")
+
+	admin, err := models.GetAdminByEmail(email)
+	if err != nil {
+		renderTemplate(w, "login", map[string]any{"Error": "Invalid email or password"})
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(admin.EncryptedPassword), []byte(password)); err != nil {
+		renderTemplate(w, "login", map[string]any{"Error": "Invalid email or password"})
+		return
+	}
+
+	sessionManager.Put(r.Context(), "admin_id", fmt.Sprintf("%d", admin.ID))
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func handleLogout(w http.ResponseWriter, r *http.Request) {
+	sessionManager.Remove(r.Context(), "admin_id")
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

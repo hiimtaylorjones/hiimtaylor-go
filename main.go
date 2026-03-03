@@ -27,6 +27,7 @@ func loadTemplates() {
     pages := map[string]string{
         "home":           "templates/home.html",
         "resume":         "templates/resume.html",
+        "login":          "templates/login.html",
         "posts.index":    "templates/posts/index.html",
         "posts.show":     "templates/posts/show.html",
         "posts.new":      "templates/posts/new.html",
@@ -79,9 +80,9 @@ func main() {
     r.Get("/resume", handleResume)
 
     // Auth routes
-    // r.Get("/login", handleLoginForm)
-    // r.Post("/login", handleLogin)
-    // r.Post("/logout", handleLogout)
+    r.Get("/login", handleLoginForm)
+    r.Post("/login", handleLogin)
+    r.Post("/logout", handleLogout)
 
     // Protected routes
     r.Group(func(r chi.Router) {
