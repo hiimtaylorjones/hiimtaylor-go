@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"fmt"
+	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
 	"github.com/go-chi/chi/v5"
@@ -21,12 +22,34 @@ func handleHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleListPosts(w http.ResponseWriter, r *http.Request) {
-	posts, err := models.GetPublishedPosts()
+
+	const perPage = 10
+
+	page := 1
+	if p := r.URL.Query().Get("page"); p != "" {
+		if n, err := strconv.Atoi(p); err == nil && n > 0 {
+			page = n
+		}
+	}
+
+	totalCount, err := models.CountPublishedPosts()
 	if err != nil {
 		http.Error(w, "Error fetching posts", http.StatusInternalServerError)
 		return
 	}
-	renderTemplate(w, "posts.index", map[string]any{"Posts": posts})
+
+	posts, err := models.GetPublishedPosts(page, perPage)
+	if err != nil {
+		http.Error(w, "Error fetching posts", http.StatusInternalServerError)
+		return
+	}
+
+	pagination := models.NewPagination(page, perPage, totalCount)
+
+	renderTemplate(w, "posts.index", map[string]any{
+		"Posts": posts,
+		"Pagination": pagination,
+	})
 }
 
 func handleShowPost(w http.ResponseWriter, r *http.Request) {

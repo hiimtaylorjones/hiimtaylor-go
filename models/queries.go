@@ -7,11 +7,29 @@ import (
 	"github.com/hiimtaylorjones/hiimtaylor-go/database"
 )
 
-func GetPublishedPosts() ([]Post, error) {
-	query := "SELECT id, title, tagline, body, slug, published, created_at, updated_at FROM posts WHERE published = TRUE ORDER BY created_at DESC"
+func CountPublishedPosts() (int, error) {
+	var count int
+	err := database.Pool.QueryRow(
+		context.Background(),
+		`SELECT COUNT(*) FROM posts WHERE published = TRUE`,
+	).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("error counting posts: %w", err)
+	}
+	return count, nil
+}
+
+func GetPublishedPosts(page, perPage int) ([]Post, error) {
+	offset := (page - 1) * perPage
+	query := `SELECT id, title, tagline, body, slug, published, created_at, updated_at 
+						FROM posts WHERE published = TRUE 
+						ORDER BY created_at DESC
+						LIMIT $1 OFFSET $2`
 
 	rows, err := database.Pool.Query(
-		context.Background(), query,
+		context.Background(),
+		query,
+		perPage, offset,
 	)
 
 	if err != nil {
