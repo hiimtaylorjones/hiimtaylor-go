@@ -14,7 +14,7 @@ A guided reconstruction of a personal Rails 8 website in Go — built step by st
 | [Step 6](./step-06-posts-read.md) | Posts CRUD — Read Side | Complete |
 | [Step 7](./step-07-posts-write.md) | Posts CRUD — Write Side | Complete |
 | [Step 8](./step-08-auth.md) | Admin Authentication | Complete |
-| [Step 9](./step-09-static-pages.md) | Static Pages (Home & Resume) | In Progress |
+| [Step 9](./step-09-static-pages.md) | Static Pages (Home & Resume) | Complete |
 | [Step 10](./step-10-pagination.md) | Pagination | Planned |
 | [Step 11](./step-11-image-uploads.md) | Image Uploads (Stretch Goal) | Planned |
 
