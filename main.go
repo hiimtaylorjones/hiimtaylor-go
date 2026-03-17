@@ -34,10 +34,16 @@ func loadTemplates() {
         "posts.edit":     "templates/posts/edit.html",
     }
 
+    funcMap := template.FuncMap{
+      "add":      func(a, b int) int { return a + b },
+      "subtract": func(a, b int) int { return a - b },
+    }
+
     for name, pages := range pages {
         files := append(layouts, partials...)
         files = append(files, pages)
-        templates[name] = template.Must(template.ParseFiles(files...))
+        tmpl := template.New("").Funcs(funcMap)
+        templates[name] = template.Must(tmpl.ParseFiles(files...))
     }
 }
 

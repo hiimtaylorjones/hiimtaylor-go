@@ -8,4 +8,16 @@
     {{else}}
     <p>No posts yet.</p>
     {{end}}
+
+    {{with .Pagination}}
+    <nav class="pagination">
+      {{if .HasPrev}}
+        <a href="/posts?page={{subtract .CurrentPage 1}}">&larr; Newer</a>
+      {{end}}
+      <span>Page {{.CurrentPage}} of {{.TotalPages}}</span>
+      {{if .HasNext}}
+        <a href="/posts?page={{add .CurrentPage 1}}">Older &rarr;</a>
+      {{end}}
+    </nav>
+    {{end}}
   {{end}}
