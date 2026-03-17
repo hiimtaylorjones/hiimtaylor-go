@@ -6,12 +6,18 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 	"github.com/go-chi/chi/v5"
+	"github.com/hiimtaylorjones/hiimtaylor-go/content"
 	"github.com/hiimtaylorjones/hiimtaylor-go/models"
 	"github.com/hiimtaylorjones/hiimtaylor-go/slug"
 )
 
 func handleHome(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "home", nil)
+	html, err := content.Render("home.md")
+	if err != nil {
+		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		return
+	}
+	renderTemplate(w, "home", map[string]any{"Content": html})
 }
 
 func handleListPosts(w http.ResponseWriter, r *http.Request) {
@@ -112,7 +118,12 @@ func handleDeletePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleResume(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "resume", nil)
+	html, err := content.Render("resume.md")
+	if err != nil {
+		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		return
+	}
+	renderTemplate(w, "resume", map[string]any{"Content": html})
 }
 
 func handleLoginForm(w http.ResponseWriter, r *http.Request) {
