@@ -15,6 +15,7 @@ type Post struct {
 	Body			string
 	Slug			string
 	Published	bool
+	BannerImageURL string
 	CreatedAt	time.Time
 	UpdatedAt	time.Time
 }
