@@ -1,6 +1,6 @@
 {{define "content"}}
 <h1>New Post</h1>
-<form method="POST" action="/posts">
+<form method="POST" action="/posts" enctype="multipart/form-data">
     <div>
         <label for="banner_image">Banner Image</label>
         <input type="file" id="banner_image" name="banner_image" accept="image/*">
