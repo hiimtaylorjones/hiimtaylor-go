@@ -16,6 +16,16 @@ func TestPost_RenderedBody(t *testing.T) {
 			body:     "## Hello World",
 			contains: "<h2>Hello World</h2>",
 		},
+		{
+			name:     "Renders bold and italics",
+			body:     "**bold** _italics_",
+			contains: "<strong>bold</strong> <em>italics</em>",
+		},
+		{
+			name:     "Renders links",
+			body:     "[link](https://hiimtaylorjones.com)",
+			contains: "<a href=\"https://hiimtaylorjones.com\">link</a>",
+		},
 	}
 
 	for _, tt := range tests {
