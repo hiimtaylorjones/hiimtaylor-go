@@ -1,6 +1,6 @@
 module github.com/hiimtaylorjones/hiimtaylor-go
 
-go 1.25.7
+go 1.26.1
 
 require (
 	github.com/alexedwards/scs/v2 v2.9.0
