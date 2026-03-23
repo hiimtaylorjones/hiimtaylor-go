@@ -21,7 +21,7 @@ func CountPublishedPosts() (int, error) {
 
 func GetPublishedPosts(page, perPage int) ([]Post, error) {
 	offset := (page - 1) * perPage
-	query := `SELECT id, title, tagline, body, slug, published, created_at, updated_at 
+	query := `SELECT id, title, tagline, body, slug, banner_image_url, published, created_at, updated_at 
 						FROM posts WHERE published = TRUE 
 						ORDER BY created_at DESC
 						LIMIT $1 OFFSET $2`
@@ -43,7 +43,7 @@ func GetPublishedPosts(page, perPage int) ([]Post, error) {
 		var p Post
 		err := rows.Scan(
 			&p.ID, &p.Title, &p.Tagline, &p.Body, &p.Slug,
-			&p.Published, &p.CreatedAt, &p.UpdatedAt,
+			&p.BannerImageURL, &p.Published, &p.CreatedAt, &p.UpdatedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing post: %w", err)
@@ -56,14 +56,15 @@ func GetPublishedPosts(page, perPage int) ([]Post, error) {
 
 func GetPostBySlug(slug string) (Post, error) {
 	var p Post
-	query := "SELECT id, title, tagline, body, slug, published, created_at, updated_at FROM posts WHERE slug = $1"
+	query := `SELECT id, title, tagline, body, slug, published, banner_image_url, created_at, updated_at 
+						FROM posts WHERE slug = $1`
 	err := database.Pool.QueryRow(
 		context.Background(),
 		query,
 		slug,
 	).Scan(
 		&p.ID, &p.Title, &p.Tagline, &p.Body, &p.Slug,
-		&p.Published, &p.CreatedAt, &p.UpdatedAt,
+		&p.Published, &p.BannerImageURL, &p.CreatedAt, &p.UpdatedAt,
 	)
 
 	if err != nil {
@@ -72,43 +73,43 @@ func GetPostBySlug(slug string) (Post, error) {
 	return p, nil
 }
 
-func CreatePost(title, tagline, body, slug string, published bool) (Post, error) {
+func CreatePost(title, tagline, body, slug, bannerImageURL string, published bool) (Post, error) {
 	var p Post
 	query := `
-		INSERT INTO posts (title, tagline, body, slug, published) 
-			VALUES($1, $2, $3, $4, $5) 
-			RETURNING id, title, tagline, body, slug, published, created_at, updated_at
+		INSERT INTO posts (title, tagline, body, slug, published, banner_image_url) 
+			VALUES($1, $2, $3, $4, $5, $6) 
+			RETURNING id, title, tagline, body, slug, published, banner_image_url, created_at, updated_at
 	`
 	err := database.Pool.QueryRow(
 		context.Background(),
 		query,
-		title, tagline, body, slug, published,
+		title, tagline, body, slug, published, bannerImageURL,
 	).Scan(
 		&p.ID, &p.Title, &p.Tagline, &p.Body, &p.Slug,
-		&p.Published, &p.CreatedAt, &p.UpdatedAt,
+		&p.Published, &p.BannerImageURL, &p.CreatedAt, &p.UpdatedAt,
 	)
-	
+
 	if err != nil {
 		return Post{}, fmt.Errorf("error creating post: %w", err)
 	}
 	return p, nil
 }
 
-func UpdatePost(id int, title, tagline, body string, published bool) (Post, error) {
+func UpdatePost(id int, title, tagline, body, bannerImageURL string, published bool) (Post, error) {
 	var p Post
 	query := `
-		UPDATE posts SET title=$1, tagline=$2, body=$3, published=$4, updated_at=NOW()
-			WHERE id=$5
-			RETURNING id, title, tagline, body, slug, published, created_at, updated_at
+		UPDATE posts SET title=$1, tagline=$2, body=$3, published=$4, banner_image_url=$5, updated_at=NOW()
+			WHERE id=$6
+			RETURNING id, title, tagline, body, slug, published, banner_image_url, created_at, updated_at
 	`
 
 	err := database.Pool.QueryRow(
 		context.Background(),
 		query,
-		title, tagline, body, published, id,
+		title, tagline, body, published, bannerImageURL, id,
 	).Scan(
 		&p.ID, &p.Title, &p.Tagline, &p.Body, &p.Slug,
-		&p.Published, &p.CreatedAt, &p.UpdatedAt,
+		&p.Published, &p.BannerImageURL, &p.CreatedAt, &p.UpdatedAt,
 	)
 	
 	if err != nil {

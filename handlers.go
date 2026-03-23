@@ -10,6 +10,7 @@ import (
 	"github.com/hiimtaylorjones/hiimtaylor-go/content"
 	"github.com/hiimtaylorjones/hiimtaylor-go/models"
 	"github.com/hiimtaylorjones/hiimtaylor-go/slug"
+	"github.com/hiimtaylorjones/hiimtaylor-go/uploads"
 )
 
 func handleHome(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +68,8 @@ func handleNewPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleCreatePost(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
+	// Caps form data at 10 MB limit.
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
 		http.Error(w, "Error parsing form", http.StatusBadRequest)
 		return
 	}
@@ -78,7 +80,18 @@ func handleCreatePost(w http.ResponseWriter, r *http.Request) {
 	published := r.FormValue("published") == "true"
 	postSlug := slug.Generate(title)
 
-	post, err := models.CreatePost(title, tagline, body, postSlug, published)
+	var bannerImageURL string
+	file, header, err := r.FormFile("banner_image")
+	if err == nil {
+		defer file.Close()
+		bannerImageURL, err = uploads.Save(file, header)
+		if err != nil {
+			http.Error(w, "Error saving image", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	post, err := models.CreatePost(title, tagline, body, postSlug, bannerImageURL, published)
 	if err != nil {
 					http.Error(w, "Error creating post", http.StatusInternalServerError)
 					return
@@ -105,7 +118,7 @@ func handleUpdatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := r.ParseForm(); err != nil {
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
 		http.Error(w, "Error parsing form", http.StatusBadRequest)
 		return
 	}
@@ -114,8 +127,19 @@ func handleUpdatePost(w http.ResponseWriter, r *http.Request) {
   tagline := r.FormValue("tagline")
   body := r.FormValue("body")
   published := r.FormValue("published") == "true"
+	bannerImageURL := post.BannerImageURL
 
-	updated, err := models.UpdatePost(post.ID, title, tagline, body, published)
+	file, header, err := r.FormFile("banner_image")
+	if err == nil {
+		defer file.Close()
+		bannerImageURL, err = uploads.Save(file, header)
+		if err != nil {
+			http.Error(w, "Error saving image", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	updated, err := models.UpdatePost(post.ID, title, tagline, body, bannerImageURL, published)
 	if err != nil {
 		http.Error(w, "Error updating post", http.StatusInternalServerError)
 		return

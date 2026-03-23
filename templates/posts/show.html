@@ -1,9 +1,12 @@
-  {{define "content"}}
-  <article>
-      <h1>{{.Post.Title}}</h1>
-      <p class="tagline">{{.Post.Tagline}}</p>
-      <div class="post-body">
-          {{.Post.RenderedBody}}
-      </div>
-  </article>
-  {{end}}
+{{define "content"}}
+<article>
+{{if .Post.BannerImageURL}}
+<img src="{{.Post.BannerImageURL}}" alt="{{.Post.Title}}" class="banner-image">
+{{end}}
+<h1>{{.Post.Title}}</h1>
+<p class="tagline">{{.Post.Tagline}}</p>
+<div class="post-body">
+    {{.Post.RenderedBody}}
+</div>
+</article>
+{{end}}
