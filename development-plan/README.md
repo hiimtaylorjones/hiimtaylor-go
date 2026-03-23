@@ -16,7 +16,7 @@ A guided reconstruction of a personal Rails 8 website in Go — built step by st
 | [Step 8](./step-08-auth.md) | Admin Authentication | Complete |
 | [Step 9](./step-09-static-pages.md) | Static Pages (Home & Resume) | Complete |
 | [Step 10](./step-10-pagination.md) | Pagination | Complete |
-| [Step 11](./step-11-image-uploads.md) | Image Uploads (Stretch Goal) | Planned |
+| [Step 11](./step-11-image-uploads.md) | Image Uploads | Complete |
 
 ## Tech Stack
 
