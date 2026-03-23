@@ -1,16 +1,17 @@
 package main
 
 import (
-	"net/http"
 	"fmt"
+	"net/http"
 	"strconv"
 
-	"golang.org/x/crypto/bcrypt"
 	"github.com/go-chi/chi/v5"
 	"github.com/hiimtaylorjones/hiimtaylor-go/content"
 	"github.com/hiimtaylorjones/hiimtaylor-go/models"
+	"github.com/hiimtaylorjones/hiimtaylor-go/queries"
 	"github.com/hiimtaylorjones/hiimtaylor-go/slug"
 	"github.com/hiimtaylorjones/hiimtaylor-go/uploads"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func handleHome(w http.ResponseWriter, r *http.Request) {
@@ -33,13 +34,13 @@ func handleListPosts(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	totalCount, err := models.CountPublishedPosts()
+	totalCount, err := queries.CountPublishedPosts()
 	if err != nil {
 		http.Error(w, "Error fetching posts", http.StatusInternalServerError)
 		return
 	}
 
-	posts, err := models.GetPublishedPosts(page, perPage)
+	posts, err := queries.GetPublishedPosts(page, perPage)
 	if err != nil {
 		http.Error(w, "Error fetching posts", http.StatusInternalServerError)
 		return
@@ -48,14 +49,14 @@ func handleListPosts(w http.ResponseWriter, r *http.Request) {
 	pagination := models.NewPagination(page, perPage, totalCount)
 
 	renderTemplate(w, "posts.index", map[string]any{
-		"Posts": posts,
+		"Posts":      posts,
 		"Pagination": pagination,
 	})
 }
 
 func handleShowPost(w http.ResponseWriter, r *http.Request) {
 	slug := chi.URLParam(r, "slug")
-	post, err := models.GetPostBySlug(slug)
+	post, err := queries.GetPostBySlug(slug)
 	if err != nil {
 		http.NotFound(w, r)
 		return
@@ -91,10 +92,10 @@ func handleCreatePost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	post, err := models.CreatePost(title, tagline, body, postSlug, bannerImageURL, published)
+	post, err := queries.CreatePost(title, tagline, body, postSlug, bannerImageURL, published)
 	if err != nil {
-					http.Error(w, "Error creating post", http.StatusInternalServerError)
-					return
+		http.Error(w, "Error creating post", http.StatusInternalServerError)
+		return
 	}
 
 	http.Redirect(w, r, "/posts/"+post.Slug, http.StatusSeeOther)
@@ -102,7 +103,7 @@ func handleCreatePost(w http.ResponseWriter, r *http.Request) {
 
 func handleEditPost(w http.ResponseWriter, r *http.Request) {
 	postSlug := chi.URLParam(r, "slug")
-	post, err := models.GetPostBySlug(postSlug)
+	post, err := queries.GetPostBySlug(postSlug)
 	if err != nil {
 		http.NotFound(w, r)
 		return
@@ -112,7 +113,7 @@ func handleEditPost(w http.ResponseWriter, r *http.Request) {
 
 func handleUpdatePost(w http.ResponseWriter, r *http.Request) {
 	postSlug := chi.URLParam(r, "slug")
-	post, err := models.GetPostBySlug(postSlug)
+	post, err := queries.GetPostBySlug(postSlug)
 	if err != nil {
 		http.NotFound(w, r)
 		return
@@ -124,9 +125,9 @@ func handleUpdatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	title := r.FormValue("title")
-  tagline := r.FormValue("tagline")
-  body := r.FormValue("body")
-  published := r.FormValue("published") == "true"
+	tagline := r.FormValue("tagline")
+	body := r.FormValue("body")
+	published := r.FormValue("published") == "true"
 	bannerImageURL := post.BannerImageURL
 
 	file, header, err := r.FormFile("banner_image")
@@ -139,7 +140,7 @@ func handleUpdatePost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	updated, err := models.UpdatePost(post.ID, title, tagline, body, bannerImageURL, published)
+	updated, err := queries.UpdatePost(post.ID, title, tagline, body, bannerImageURL, published)
 	if err != nil {
 		http.Error(w, "Error updating post", http.StatusInternalServerError)
 		return
@@ -150,13 +151,13 @@ func handleUpdatePost(w http.ResponseWriter, r *http.Request) {
 
 func handleDeletePost(w http.ResponseWriter, r *http.Request) {
 	postSlug := chi.URLParam(r, "slug")
-	post, err := models.GetPostBySlug(postSlug)
+	post, err := queries.GetPostBySlug(postSlug)
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
 
-	if err := models.DeletePost(post.ID); err != nil {
+	if err := queries.DeletePost(post.ID); err != nil {
 		http.Error(w, "Error deleting post", http.StatusInternalServerError)
 		return
 	}
@@ -186,7 +187,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
-	admin, err := models.GetAdminByEmail(email)
+	admin, err := queries.GetAdminByEmail(email)
 	if err != nil {
 		renderTemplate(w, "login", map[string]any{"Error": "Invalid email or password"})
 		return

@@ -1,10 +1,11 @@
-package models
+package queries
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/hiimtaylorjones/hiimtaylor-go/database"
+	"github.com/hiimtaylorjones/hiimtaylor-go/models"
 )
 
 func CountPublishedPosts() (int, error) {
@@ -19,7 +20,7 @@ func CountPublishedPosts() (int, error) {
 	return count, nil
 }
 
-func GetPublishedPosts(page, perPage int) ([]Post, error) {
+func GetPublishedPosts(page, perPage int) ([]models.Post, error) {
 	offset := (page - 1) * perPage
 	query := `SELECT id, title, tagline, body, slug, banner_image_url, published, created_at, updated_at 
 						FROM posts WHERE published = TRUE 
@@ -38,9 +39,9 @@ func GetPublishedPosts(page, perPage int) ([]Post, error) {
 
 	defer rows.Close()
 
-	var posts []Post
+	var posts []models.Post
 	for rows.Next() {
-		var p Post
+		var p models.Post
 		err := rows.Scan(
 			&p.ID, &p.Title, &p.Tagline, &p.Body, &p.Slug,
 			&p.BannerImageURL, &p.Published, &p.CreatedAt, &p.UpdatedAt,
@@ -54,8 +55,8 @@ func GetPublishedPosts(page, perPage int) ([]Post, error) {
 	return posts, nil
 }
 
-func GetPostBySlug(slug string) (Post, error) {
-	var p Post
+func GetPostBySlug(slug string) (models.Post, error) {
+	var p models.Post
 	query := `SELECT id, title, tagline, body, slug, published, banner_image_url, created_at, updated_at 
 						FROM posts WHERE slug = $1`
 	err := database.Pool.QueryRow(
@@ -68,13 +69,13 @@ func GetPostBySlug(slug string) (Post, error) {
 	)
 
 	if err != nil {
-		return Post{}, fmt.Errorf("post not found: %w", err)
+		return models.Post{}, fmt.Errorf("post not found: %w", err)
 	}
 	return p, nil
 }
 
-func CreatePost(title, tagline, body, slug, bannerImageURL string, published bool) (Post, error) {
-	var p Post
+func CreatePost(title, tagline, body, slug, bannerImageURL string, published bool) (models.Post, error) {
+	var p models.Post
 	query := `
 		INSERT INTO posts (title, tagline, body, slug, published, banner_image_url) 
 			VALUES($1, $2, $3, $4, $5, $6) 
@@ -90,13 +91,13 @@ func CreatePost(title, tagline, body, slug, bannerImageURL string, published boo
 	)
 
 	if err != nil {
-		return Post{}, fmt.Errorf("error creating post: %w", err)
+		return models.Post{}, fmt.Errorf("error creating post: %w", err)
 	}
 	return p, nil
 }
 
-func UpdatePost(id int, title, tagline, body, bannerImageURL string, published bool) (Post, error) {
-	var p Post
+func UpdatePost(id int, title, tagline, body, bannerImageURL string, published bool) (models.Post, error) {
+	var p models.Post
 	query := `
 		UPDATE posts SET title=$1, tagline=$2, body=$3, published=$4, banner_image_url=$5, updated_at=NOW()
 			WHERE id=$6
@@ -111,9 +112,9 @@ func UpdatePost(id int, title, tagline, body, bannerImageURL string, published b
 		&p.ID, &p.Title, &p.Tagline, &p.Body, &p.Slug,
 		&p.Published, &p.BannerImageURL, &p.CreatedAt, &p.UpdatedAt,
 	)
-	
+
 	if err != nil {
-		return Post{}, fmt.Errorf("error updating post: %w", err)
+		return models.Post{}, fmt.Errorf("error updating post: %w", err)
 	}
 	return p, nil
 }
@@ -130,8 +131,8 @@ func DeletePost(id int) error {
 	return nil
 }
 
-func GetAdminByEmail(email string) (Admin, error) {
-	var a Admin
+func GetAdminByEmail(email string) (models.Admin, error) {
+	var a models.Admin
 	err := database.Pool.QueryRow(
 		context.Background(),
 		`SELECT id, email, encrypted_password FROM admins WHERE email = $1`,
@@ -139,22 +140,22 @@ func GetAdminByEmail(email string) (Admin, error) {
 	).Scan(&a.ID, &a.Email, &a.EncryptedPassword)
 
 	if err != nil {
-		return Admin{}, fmt.Errorf("admin not found: %w", err)
+		return models.Admin{}, fmt.Errorf("admin not found: %w", err)
 	}
 	return a, nil
 }
 
-func CreateAdmin(email, hashedPassword string) (Admin, error) {
-	var a Admin
+func CreateAdmin(email, hashedPassword string) (models.Admin, error) {
+	var a models.Admin
 	err := database.Pool.QueryRow(
-					context.Background(),
-					`INSERT INTO admins (email, encrypted_password)
+		context.Background(),
+		`INSERT INTO admins (email, encrypted_password)
 						VALUES ($1, $2)
 						RETURNING id, email, encrypted_password`,
-					email, hashedPassword,
+		email, hashedPassword,
 	).Scan(&a.ID, &a.Email, &a.EncryptedPassword)
 	if err != nil {
-					return Admin{}, fmt.Errorf("error creating admin: %w", err)
+		return models.Admin{}, fmt.Errorf("error creating admin: %w", err)
 	}
 	return a, nil
 }
