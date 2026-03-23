@@ -6,6 +6,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"log"
 	"os"
 	"strings"
 	"testing"
@@ -15,7 +16,9 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	os.Setenv("DATABASE_URL", "postgres://localhost:5432/hiimtaylor_go_test?sslmode=disable")
+	if os.Getenv("DATABASE_URL") == "" {
+		log.Fatal("DATABASE_URL must be set to run tests")
+	}
 	database.Connect()
 	defer database.Close()
 

@@ -14,7 +14,7 @@ func Connect() {
 	// Build connection URL
 	connStr := os.Getenv("DATABASE_URL")
 	if connStr == "" {
-		connStr = "postgres://localhost:5432/hiimtaylor_go_development?sslmode=disable"
+		log.Fatal("DATABASE_URL must be set")
 	}
 
 	var err error 
