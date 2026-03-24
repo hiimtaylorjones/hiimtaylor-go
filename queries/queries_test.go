@@ -34,3 +34,24 @@ func TestCreatePost(t *testing.T) {
 		t.Errorf("expected title %q, got %q", "Queries Test", post.Title)
 	}
 }
+
+func TestUpdatePost(t *testing.T) {
+	post, err := CreatePost("Test Post", "tag", "body", "test-post", "", false)
+	if err != nil {
+		t.Fatalf("Error creating post: %v", err)
+	}
+
+	post, err = UpdatePost(post.ID, "Test Post", "tag", "body", "", true)
+
+	if err != nil {
+		t.Fatalf("Error updating post: %v", err)
+	}
+
+	if post.Published != true {
+		t.Errorf("expected post update to make published true")
+	}
+
+	t.Cleanup(func() {
+		DeletePost(post.ID)
+	})
+}
