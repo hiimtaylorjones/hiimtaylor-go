@@ -9,6 +9,7 @@ import (
 
     "github.com/go-chi/chi/v5"
     "github.com/go-chi/chi/v5/middleware"
+    "github.com/joho/godotenv"
 
     "github.com/hiimtaylorjones/hiimtaylor-go/database"
     authmiddleware "github.com/hiimtaylorjones/hiimtaylor-go/middleware"
@@ -60,6 +61,7 @@ func renderTemplate(w http.ResponseWriter, name string, data any) {
 }
 
 func main() {
+    godotenv.Load()
     database.Connect()
     defer database.Close()
 

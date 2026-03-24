@@ -6,9 +6,11 @@ import (
 	"testing"
 
 	"github.com/hiimtaylorjones/hiimtaylor-go/database"
+	"github.com/joho/godotenv"
 )
 
 func TestMain(m *testing.M) {
+	godotenv.Load()
 	if os.Getenv("DATABASE_URL") == "" {
 		log.Fatal("DATABASE_URL must be set to run tests")
 	}
