@@ -5,6 +5,8 @@ import (
 	"os"
 	"testing"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/hiimtaylorjones/hiimtaylor-go/database"
 	"github.com/joho/godotenv"
 )
@@ -55,5 +57,29 @@ func TestUpdatePost(t *testing.T) {
 
 	t.Cleanup(func() {
 		DeletePost(post.ID)
+	})
+}
+
+func TestAdminCreateFetchFlow(t *testing.T) {
+	var password string = "my-secret-password"
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	admin, err := CreateAdmin("hello!@me.com", string(hash))
+
+	if err != nil {
+		t.Fatalf("Error creating admin: %v", err)
+	}
+
+	if admin.Email == "" {
+		t.Error("expected a non-zero ID from Return")
+	}
+
+	admin, err = GetAdminByEmail(admin.Email)
+
+	if err != nil {
+		t.Fatalf("Error fetching admin: %v", err)
+	}
+
+	t.Cleanup(func() {
+		DeleteAdmin(admin.Email)
 	})
 }

@@ -159,3 +159,15 @@ func CreateAdmin(email, hashedPassword string) (models.Admin, error) {
 	}
 	return a, nil
 }
+
+func DeleteAdmin(email string) bool {
+	_, err := database.Pool.Exec(
+		context.Background(),
+		`DELETE FROM admins WHERE email=$1`,
+		email,
+	)
+	if err != nil {
+		return true
+	}
+	return false
+}
